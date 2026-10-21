@@ -548,18 +548,16 @@ export const saveStoredBudget = (amount, month, year) => {
   try {
     const currentBudget = getStoredBudget();
     const now = new Date();
-    const targetMonth = month || now.getMonth() + 1;
-    const targetYear = year || now.getFullYear();
+    const targetMonth = month ? parseInt(month, 10) : now.getMonth() + 1;
+    const targetYear = year ? parseInt(year, 10) : now.getFullYear();
     const key = `${targetYear}-${String(targetMonth).padStart(2, '0')}`;
-    const parsedAmount = parseFloat(amount);
-
-    const isCurrent = targetMonth === (now.getMonth() + 1) && targetYear === now.getFullYear();
+    const parsedAmount = Math.max(0, parseFloat(amount));
 
     const updated = {
       ...currentBudget,
-      month: isCurrent ? targetMonth : currentBudget.month,
-      year: isCurrent ? targetYear : currentBudget.year,
-      amount: isCurrent ? parsedAmount : currentBudget.amount,
+      month: targetMonth,
+      year: targetYear,
+      amount: parsedAmount,
       history: {
         ...(currentBudget.history || {}),
         [key]: parsedAmount,
@@ -570,6 +568,7 @@ export const saveStoredBudget = (amount, month, year) => {
       },
       yearly: {
         ...(currentBudget.yearly || {}),
+        [String(targetYear)]: currentBudget.yearly?.[String(targetYear)] || parsedAmount * 12,
       },
       updatedAt: new Date().toISOString(),
     };
@@ -590,7 +589,7 @@ export const saveStoredYearlyBudget = (amount, year) => {
     const currentBudget = getStoredBudget();
     const now = new Date();
     const targetYear = String(year || now.getFullYear());
-    const parsedAmount = parseFloat(amount);
+    const parsedAmount = Math.max(0, parseFloat(amount));
 
     const updated = {
       ...currentBudget,

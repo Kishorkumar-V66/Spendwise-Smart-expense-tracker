@@ -472,7 +472,11 @@ export const calculateDashboardStats = (expenses = [], budgetObj = {}) => {
     0
   );
 
-  const budgetAmount = Number(budgetObj.amount) || 0;
+  const currentKey = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+  const budgetAmount =
+    budgetObj.monthly && budgetObj.monthly[currentKey] !== undefined
+      ? Number(budgetObj.monthly[currentKey])
+      : Number(budgetObj.amount) || 0;
   const remainingBudget = budgetAmount - thisMonthTotal;
   const budgetUsagePercent = budgetAmount > 0 ? (thisMonthTotal / budgetAmount) * 100 : 0;
 
