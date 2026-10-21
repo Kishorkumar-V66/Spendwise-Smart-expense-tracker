@@ -7,6 +7,9 @@ import {
   deleteStoredExpense,
   getStoredBudget,
   saveStoredBudget,
+  saveStoredYearlyBudget,
+  getBudgetForMonth,
+  getBudgetForYear,
   resetToDemoData,
 } from '../utils/storage';
 import {
@@ -16,13 +19,14 @@ import {
   calculateSpendingTrend,
   calculateAnalyticsMetrics,
   generateSmartInsights,
+  getAvailableYears,
 } from '../utils/calculations';
 
 const ExpenseContext = createContext(null);
 
 export const ExpenseProvider = ({ children }) => {
   const [expenses, setExpenses] = useState([]);
-  const [budget, setBudget] = useState({ amount: 35000 });
+  const [budget, setBudget] = useState({ amount: 35000, monthly: {}, yearly: {} });
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Initialize data on mount
@@ -66,11 +70,39 @@ export const ExpenseProvider = ({ children }) => {
     return updated;
   }, []);
 
+  const handleUpdateYearlyBudget = useCallback((amount, year) => {
+    const updated = saveStoredYearlyBudget(amount, year);
+    if (updated) {
+      setBudget(updated);
+    }
+    return updated;
+  }, []);
+
   const handleResetData = useCallback(() => {
     const { expenses: demoExpenses, budget: demoBudget } = resetToDemoData();
     setExpenses(demoExpenses);
     setBudget(demoBudget);
   }, []);
+
+  // Helper getters for specific month/year
+  const getMonthlyBudget = useCallback(
+    (year, month) => {
+      return getBudgetForMonth(budget, year, month);
+    },
+    [budget]
+  );
+
+  const getYearlyBudget = useCallback(
+    (year) => {
+      return getBudgetForYear(budget, year);
+    },
+    [budget]
+  );
+
+  // Available unique years across expenses
+  const availableYears = useMemo(() => {
+    return getAvailableYears(expenses);
+  }, [expenses]);
 
   // Memoized computations derived dynamically from real localStorage state
   const dashboardStats = useMemo(() => {
@@ -101,6 +133,7 @@ export const ExpenseProvider = ({ children }) => {
     expenses,
     budget,
     isInitialized,
+    availableYears,
     dashboardStats,
     categoryBreakdown,
     monthlySpending,
@@ -111,6 +144,9 @@ export const ExpenseProvider = ({ children }) => {
     updateExpense: handleUpdateExpense,
     deleteExpense: handleDeleteExpense,
     updateBudget: handleUpdateBudget,
+    updateYearlyBudget: handleUpdateYearlyBudget,
+    getMonthlyBudget,
+    getYearlyBudget,
     resetData: handleResetData,
   };
 

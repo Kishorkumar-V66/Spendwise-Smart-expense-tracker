@@ -8,6 +8,8 @@ export const BudgetProgress = ({
   remainingAmount = 0,
   usagePercent = 0,
   onEditBudget,
+  title = 'Monthly Budget Progress',
+  subtitle = 'Real-time tracking of current month spending against your target',
 }) => {
   const isOverBudget = remainingAmount < 0;
   const isNearBudget = usagePercent >= 80 && !isOverBudget;
@@ -33,14 +35,12 @@ export const BudgetProgress = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-base font-bold text-slate-900">Monthly Budget Progress</h3>
+            <h3 className="text-base font-bold text-slate-900">{title}</h3>
             <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold border ${badgeClass}`}>
               {badgeText}
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Real-time tracking of current month spending against your target
-          </p>
+          <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>
         </div>
 
         {onEditBudget && (
